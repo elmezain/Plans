@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /profiles/{uid} {
+      // Any signed-in account may read its own profile (needed right after sign-in to
+      // learn its own role); an admin may read any profile (needed for the admin panel).
+      allow get: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+
+      // Only an existing admin may create, edit or remove accounts.
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin()
+        // ...except: any signed-in user may stamp THEIR OWN "last sign-in" time, and
+        // nothing else, on their own profile document.
+        || (isSignedIn() && request.auth.uid == uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin']));
+    }
+
+    // Activity log. Only ever written by an already-authenticated user, about themselves
+    // or about an action they just took as an admin -- never by a visitor who has not
+    // signed in (a failed login attempt is tracked locally in the browser instead).
+    match /audit/{entry} {
+      allow create: if isSignedIn() && request.resource.data.actor == request.auth.token.email;
+      allow get, list: if isAdmin();
+      allow update, delete: if false;
+    }
+  }
+}
