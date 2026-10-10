@@ -1762,12 +1762,6 @@ var CFG = {
    Project settings -> General -> "Your apps" -> SDK setup and configuration).
    These values are not secret -- they only identify which Firebase project to talk to;
    access is controlled by the Firestore Security Rules, not by hiding this object. */
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDlOkFK5HdtoQtE8BYtRbR0yiijEhJdr38",
   authDomain: "program-tree.firebaseapp.com",
@@ -1776,9 +1770,6 @@ const firebaseConfig = {
   messagingSenderId: "684665682067",
   appId: "1:684665682067:web:3055c3f81ce81bf8403566"
 };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
 // Optional convenience: lets an administrator type a short name instead of their full
 // email on the Administrator tab. Purely a client-side alias -- add as many as you like.
 var ADMIN_ALIASES = {
